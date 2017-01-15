@@ -1,0 +1,20 @@
+{
+    "app_name": "Raptor-Runner",
+    "main": "game.html",
+    "name": "Raptor-Runner",
+    "webkit": {},
+    "window": {
+        "frame": true,
+        "height": 400,
+        "id": "Raptor-Runner",
+        "max_height": 400,
+        "max_width": 600,
+        "min_height": 400,
+        "min_width": 600,
+        "show": true,
+        "show_in_taskbar": true,
+        "title": "Raptor-Runner",
+        "visible": true,
+        "width": 600
+    }
+}
