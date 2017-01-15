@@ -17,7 +17,7 @@
 var game = new Phaser.Game(600, 400, Phaser.AUTO, '', { preload: preload, create: create, update: update });
 
 function preload() {
-  game.load.spritesheet('raptor', 'sprites/raptor.png', 200, 92);
+  game.load.spritesheet('raptor', 'sprites/raptorspritesheet.png', 200, 92);
   game.load.image('ground', 'sprites/ground2.png');
   game.load.image('obstacle', 'sprites/obstacle.png');
   game.load.image('sky', 'sprites/sky_placeholder.png');
@@ -27,6 +27,8 @@ var player;
 var platform;
 var obstacle;
 var cursors;
+//Gamespeed var that gets higher gradually, affects also animation speed
+var gamespeed = 10;
 
 function create() {
 
@@ -58,12 +60,13 @@ function create() {
   game.physics.arcade.enable(player);
 
   //Player physics properties
-  player.body.bounce.y = 0.2;
+  player.body.bounce.y = 0;
   player.body.gravity.y = 500;
   player.body.collideWorldBounds = true;
 
-  //Animation here later
-  //player.animations.add('move',[0,1,2,3],10, true);
+  //Animations here
+  player.animations.add('move',[0,1,2,3],gamespeed, true);
+	player.animations.add('jump',[4,5],gamespeed,true);
 
   //Obstacles here later
 
@@ -85,6 +88,14 @@ function update() {
   {
     player.body.velocity.y = -400;
   }
+	else if (!player.body.touching.down){
+		player.animations.play('jump');
+	}
+  else
+	{
+  	player.animations.play('move');
+  }
+
 
 }
 
