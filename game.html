@@ -1,0 +1,105 @@
+<!doctype html>
+<html lang="en">
+<head>
+	<meta charset="UTF-8" />
+	<title>Raptor Runner</title>
+	<script type="text/javascript" src="phaser.js"></script>
+    <style type="text/css">
+        body {
+            margin: 0;
+        }
+    </style>
+</head>
+<body>
+
+<script type="text/javascript">
+
+var game = new Phaser.Game(600, 400, Phaser.AUTO, '', { preload: preload, create: create, update: update });
+
+function preload() {
+  game.load.spritesheet('raptor', 'sprites/raptorspritesheet.png', 200, 92);
+  game.load.image('ground', 'sprites/ground2.png');
+  game.load.image('obstacle', 'sprites/obstacle.png');
+  game.load.image('sky', 'sprites/sky_placeholder.png');
+}
+
+var player;
+var platform;
+var obstacle;
+var cursors;
+//Gamespeed var that gets higher gradually, affects also animation speed
+var gamespeed = 10;
+
+function create() {
+
+  //Add sky
+  game.add.tileSprite(0,0,600,600,'sky');
+
+  //Physics
+  game.physics.startSystem(Phaser.Physics.ARCADE);
+
+  //Group for ground sprite
+  platform = game.add.group();
+
+  //Physics for group
+  platform.enableBody = true;
+
+  //Create ground
+  var ground = platform.create(0, game.world.height - 30, 'ground');
+
+  //Scale ground
+  ground.scale.setTo(2,2);
+
+  //Ground wont fall when player jumps on it
+  ground.body.immovable = true;
+
+  //Player
+  player = game.add.sprite(32, game.world.height - 150, 'raptor');
+
+  //Physics for player
+  game.physics.arcade.enable(player);
+
+  //Player physics properties
+  player.body.bounce.y = 0;
+  player.body.gravity.y = 500;
+  player.body.collideWorldBounds = true;
+
+  //Animations here
+  player.animations.add('move',[0,1,2,3],gamespeed, true);
+	player.animations.add('jump',[4,5],gamespeed,true);
+
+  //Obstacles here later
+
+  //Controls
+  cursors = game.input.keyboard.createCursorKeys();
+}
+
+function update() {
+
+  //Collide the player with platforms
+  game.physics.arcade.collide(player, platform);
+
+  // Reset velocity
+  // Only background, ground and obstacles move!
+  player.body.velocity.x = 0;
+
+  //jump key
+  if (cursors.up.isDown  && player.body.touching.down)
+  {
+    player.body.velocity.y = -400;
+  }
+	else if (!player.body.touching.down){
+		player.animations.play('jump');
+	}
+  else
+	{
+  	player.animations.play('move');
+  }
+
+
+}
+
+</script>
+
+</body>
+</html>
