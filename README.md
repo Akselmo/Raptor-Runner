@@ -5,6 +5,8 @@ A simple endless runner game featuring a raptor with hoverboots and a laser pist
 
 The game is made in Javascript and it uses the Phaser engine.
 
+Background music is [To The Next Destination by TeknoAXE](http://teknoaxe.com/Link_Code_4.php?q=1155&Genre=Eight)
+
 
 ##Tools
 
