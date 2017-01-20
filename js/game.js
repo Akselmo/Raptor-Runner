@@ -12,6 +12,11 @@ function preload() {
 var player;
 var platform;
 var obstacles;
+var keyUp;
+var keyDown;
+var keyRight;
+var keyLeft;
+var keySpace;
 var text;
 var style;
 //Gamespeed var that gets higher gradually, affects also animation speed
@@ -87,6 +92,7 @@ function create() {
   keyDown = game.input.keyboard.addKey(Phaser.Keyboard.DOWN);
   keyLeft = game.input.keyboard.addKey(Phaser.Keyboard.LEFT);
   keyRight = game.input.keyboard.addKey(Phaser.Keyboard.RIGHT);
+  keySpace = game.input.keyboard.addKey(Phaser.Keyboard.SPACEBAR);
 
   //Music, probably not working correctly yet
   music = game.add.sound('music');
@@ -188,6 +194,7 @@ function restart()
   //stop player from moving
   player.body.velocity.x = 0;
   text.setText("You crashed! Gamespeed: " + gamespeed + "");
+  if (keySpace.isDown)
   {
     player.reset(32, game.world.height - 150);
     obstacles.reset(game.world.width+50,game.world.height - 120);
