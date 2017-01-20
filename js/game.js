@@ -12,7 +12,6 @@ function preload() {
 var player;
 var platform;
 var obstacles;
-var cursors;
 var text;
 var style;
 //Gamespeed var that gets higher gradually, affects also animation speed
@@ -82,8 +81,12 @@ function create() {
   //Score
   scoretext = game.add.text(100,200, "Score: " + score, style );
   scoretext.anchor.set(-3,7.5);
+
   //Controls
-  cursors = game.input.keyboard.createCursorKeys();
+  keyUp = game.input.keyboard.addKey(Phaser.Keyboard.UP);
+  keyDown = game.input.keyboard.addKey(Phaser.Keyboard.DOWN);
+  keyLeft = game.input.keyboard.addKey(Phaser.Keyboard.LEFT);
+  keyRight = game.input.keyboard.addKey(Phaser.Keyboard.RIGHT);
 
   //Music, probably not working correctly yet
   music = game.add.sound('music');
@@ -104,15 +107,15 @@ function update() {
   player.body.velocity.x = 0;
 
   //up left right movement keys
-  if (cursors.up.isDown  && player.body.touching.down)
+  if (keyUp.isDown  && player.body.touching.down)
   {
     player.body.velocity.y = -500;
   }
-  else if (cursors.right.isDown)
+  else if (keyRight.isDown)
   {
     player.body.velocity.x = 250;
   }
-  else if (cursors.left.isDown)
+  else if (keyLeft.isDown)
   {
     player.body.velocity.x = -250;
   }
@@ -178,14 +181,24 @@ function render()
 function restart()
 {
   gamespeed = 0;
+  keyUp.enabled = false;
+  keyDown.enabled = false;
+  keyLeft.enabled = false;
+  keyRight.enabled = false;
+  //stop player from moving
+  player.body.velocity.x = 0;
   text.setText("You crashed! Gamespeed: " + gamespeed + "");
-  if (cursors.up.isDown || cursors.left.isDown || cursors.right.isDown)
   {
     player.reset(32, game.world.height - 150);
     obstacles.reset(game.world.width+50,game.world.height - 120);
     gamespeed = gamespeedDefault;
     score = 0;
-
+    text.setText("Spacekey asd");
+    //enable keys again!
+    keyUp.enabled = true;
+    keyDown.enabled = true;
+    keyLeft.enabled = true;
+    keyRight.enabled = true;
   }
 
 
