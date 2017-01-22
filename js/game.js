@@ -1,8 +1,13 @@
+//Things to do: Main menu, shooting, flying enemies, background, ground anim
+//Clean up code when above is done
+//Written by Akseli Lahtinen
+//Hope you enjoy my spaghetti code ᕕ(ᐛ)ᕗ
+
 var game = new Phaser.Game(600, 400, Phaser.AUTO, 'gameDiv', { preload: preload, create: create, update: update });
 
 
 function preload() {
-  game.load.spritesheet('raptor', 'sprites/raptorspritesheet.png', 200, 92);
+  game.load.spritesheet('raptor', 'sprites/raptorjacketspritesheet.png', 200, 92);
   game.load.image('ground', 'sprites/ground2.png');
   game.load.image('obstacle', 'sprites/obstacle.png');
   game.load.image('sky', 'sprites/sky_placeholder.png');
@@ -26,6 +31,7 @@ var gamespeedMax = 300;
 var music;
 var GlobalGame;
 var score = 0;
+var playerHit = 0;
 
 
 function create() {
@@ -77,6 +83,8 @@ function create() {
   //Animations here
   player.animations.add('move',[0,1,2,3],12, true);
   player.animations.add('jump',[4,5],12,true);
+  player.animations.add('fall',[6],1,true);
+  player.animations.add('dead',[7],1,true);
 
   //debug text
   style = { font: "14px Arial", fill: "#ff0044", align: "left" };
@@ -95,11 +103,11 @@ function create() {
   keySpace = game.input.keyboard.addKey(Phaser.Keyboard.SPACEBAR);
 
   //Music, probably not working correctly yet
-  music = game.add.sound('music');
+  music = game.add.sound('music', true);
   music.play();
   music.volume = 0.1;
   music.loop = true;
-
+  playerHit = false;
 }
 
 function update() {
@@ -127,15 +135,26 @@ function update() {
   }
 
   //switch animations depending is player in air or not
-  if (!player.body.touching.down)
+  if (playerHit == false && !player.body.touching.down)
   {
     player.animations.play('jump');
   }
-  else
+  //check if player is hit & in air, play falling animation if hit
+  else if (playerHit == true && !player.body.touching.down)
+  {
+    player.animations.play("fall");
+  }
+  //check if player is hit & not in air, play falling animation if hit
+  else if (playerHit == true && player.body.touching.down)
+  {
+    player.animations.play("dead");
+  }
+  else if (player.body.touching.down)
   {
     player.animations.play('move');
   }
 
+  //move obstacles backwards * gamespeed
   obstacles.body.velocity.x = -gamespeed*10;
   //reset obstacle if it's out of bounds
   //the random variable is for making the obstacle spawn in
@@ -150,9 +169,11 @@ function update() {
     score = score*1 + 100;
 
   }
-  else if (game.physics.arcade.overlap(player,obstacles))
-  {
 
+  //Check if player collides with obstacle
+  if (game.physics.arcade.overlap(player,obstacles))
+  {
+    playerHit = true;
     restart();
   }
   // Gamespeed won't go over max speed
@@ -161,14 +182,14 @@ function update() {
     gamespeed = gamespeedMax;
   }
   //debugtext
-  text.setText("Gamespeed: " + gamespeed + "");
+  text.setText("Gamespeed: " + gamespeed + "   " + playerHit);
   scoretext.setText("Score: " + score );
   //Debug renderer
   //REMEMBER TO REMOVE (ʘᗩʘ')
   //render();
 }
 
-//Main menu things
+//TO DO: Main menu things
 function mainmenu()
 {
 
@@ -206,7 +227,6 @@ function restart()
     keyDown.enabled = true;
     keyLeft.enabled = true;
     keyRight.enabled = true;
+    playerHit = false;
   }
-
-
 }
