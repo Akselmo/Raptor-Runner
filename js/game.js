@@ -3,7 +3,7 @@
 //Written by Akseli Lahtinen
 //Hope you enjoy my spaghetti code ᕕ(ᐛ)ᕗ
 
-var game = new Phaser.Game(600, 400, Phaser.AUTO, 'gameDiv', { preload: preload, create: create, update: update });
+var game = new Phaser.Game(800, 500, Phaser.AUTO, 'gameDiv', { preload: preload, create: create, update: update });
 
 
 function preload() {
@@ -11,10 +11,14 @@ function preload() {
   game.load.image('ground', 'sprites/ground2.png');
   game.load.image('obstacle', 'sprites/obstacle.png');
   game.load.image('sky', 'sprites/sky_placeholder.png');
+  game.load.image('bullet', 'sprites/bullet.png');
   game.load.audio('music', 'sound/tothenextdestination.mp3');
 }
 
 var player;
+var bullets;
+var bulletTime = 0;
+var canFire = true;
 var platform;
 var obstacles;
 var keyUp;
@@ -37,7 +41,7 @@ var playerHit = 0;
 function create() {
 
   //Add sky
-  game.add.tileSprite(0,0,600,600,'sky');
+  game.add.tileSprite(0,0,game.width,game.height,'sky');
 
   //Physics
   game.physics.startSystem(Phaser.Physics.ARCADE);
@@ -79,6 +83,17 @@ function create() {
   player.body.collideWorldBounds = true;
   //Player hitbox
   player.body.setSize(90,75,100,0);
+
+  //bullets
+  bullets = game.add.group();
+  bullets.enableBody = true;
+  bullets.physicsBodyType = Phaser.Physics.ARCADE;
+  bullets.createMultiple(30,'bullet');
+  bullets.setAll('anchor.x', 1);
+  bullets.setAll('anchor.y', 1);
+  bullets.setAll('outOfBoundsKill', true);
+  bullets.setAll('checkWorldBounds',true);
+  canFire = true;
 
   //Animations here
   player.animations.add('move',[0,1,2,3],12, true);
@@ -123,7 +138,7 @@ function update() {
   //up left right movement keys
   if (keyUp.isDown  && player.body.touching.down)
   {
-    player.body.velocity.y = -500;
+    player.body.velocity.y = -550;
   }
   else if (keyRight.isDown)
   {
@@ -132,6 +147,12 @@ function update() {
   else if (keyLeft.isDown)
   {
     player.body.velocity.x = -250;
+  }
+
+  //Bullet firing
+  if (keySpace.isDown && canFire == true)
+  {
+    fireBullet();
   }
 
   //switch animations depending is player in air or not
@@ -143,11 +164,13 @@ function update() {
   else if (playerHit == true && !player.body.touching.down)
   {
     player.animations.play("fall");
+    canFire = false;
   }
   //check if player is hit & not in air, play falling animation if hit
   else if (playerHit == true && player.body.touching.down)
   {
     player.animations.play("dead");
+    canFire = false;
   }
   else if (player.body.touching.down)
   {
@@ -162,12 +185,10 @@ function update() {
   var r = game.rnd.integerInRange(50+gamespeed,300+gamespeed)
   if (obstacles.position.x < -50)
   {
-
     obstacles.reset(game.world.width+r,game.world.height - 120);
     obstacles.body.velocity.x = -gamespeed*10;
     gamespeed++;
     score = score*1 + 100;
-
   }
 
   //Check if player collides with obstacle
@@ -181,6 +202,12 @@ function update() {
   {
     gamespeed = gamespeedMax;
   }
+
+  if (bullets.position.x > game.width)
+  {
+    resetBullet();
+  }
+
   //debugtext
   text.setText("Gamespeed: " + gamespeed + "   " + playerHit);
   scoretext.setText("Score: " + score );
@@ -201,7 +228,31 @@ function render()
   game.debug.bodyInfo(player, 32, 32);
   game.debug.body(player);
   game.debug.body(obstacles);
+  game.debug.body(bullets);
 }
+
+
+function fireBullet ()
+{
+  //To avoid firing too many
+  if (game.time.now > bulletTime && canFire == true)
+  {
+    bullet = bullets.getFirstExists(false);
+    if (bullet)
+      {
+          bullet.reset(player.x + 198, player.y + 50);
+          bullet.body.velocity.x = 600+gamespeed;
+          bulletTime = game.time.now + 200;
+      }
+    }
+}
+
+//Kills bullets when out of bounds
+function resetBullet (bullet)
+{
+  bullet.kill();
+}
+
 
 //For now, it stops the movement and pressing any movement keys
 //resets the player location and speed and score
@@ -214,19 +265,18 @@ function restart()
   keyRight.enabled = false;
   //stop player from moving
   player.body.velocity.x = 0;
-  text.setText("You crashed! Gamespeed: " + gamespeed + "");
   if (keySpace.isDown)
   {
     player.reset(32, game.world.height - 150);
     obstacles.reset(game.world.width+50,game.world.height - 120);
     gamespeed = gamespeedDefault;
     score = 0;
-    text.setText("Spacekey asd");
     //enable keys again!
     keyUp.enabled = true;
     keyDown.enabled = true;
     keyLeft.enabled = true;
     keyRight.enabled = true;
     playerHit = false;
+    canFire = true;
   }
 }
