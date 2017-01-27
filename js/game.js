@@ -5,7 +5,6 @@
 
 var game = new Phaser.Game(800, 500, Phaser.AUTO, 'gameDiv', { preload: preload, create: create, update: update });
 
-
 function preload() {
   game.load.spritesheet('raptor', 'sprites/raptorjacketspritesheet.png', 200, 92);
   game.load.image('ground', 'sprites/ground2.png');
@@ -13,6 +12,7 @@ function preload() {
   game.load.image('sky', 'sprites/sky_placeholder.png');
   game.load.image('bullet', 'sprites/bullet.png');
   game.load.audio('music', 'sound/tothenextdestination.mp3');
+  game.load.image('enemy', 'sprites/enemy.png');
 }
 
 var player;
@@ -21,6 +21,9 @@ var bulletTime = 0;
 var canFire = true;
 var platform;
 var obstacles;
+var enemies;
+var canSpawn = true;
+var spawnTime = 0;
 var keyUp;
 var keyDown;
 var keyRight;
@@ -36,7 +39,6 @@ var music;
 var GlobalGame;
 var score = 0;
 var playerHit = 0;
-
 
 function create() {
 
@@ -95,6 +97,17 @@ function create() {
   bullets.setAll('checkWorldBounds',true);
   canFire = true;
 
+  //enemies
+  enemies = game.add.group();
+  enemies.enableBody = true;
+  enemies.physicsBodyType = Phaser.Physics.ARCADE;
+  enemies.createMultiple(5,'enemy');
+  enemies.setAll('anchor.x', 1);
+  enemies.setAll('anchor.y', 1);
+  enemies.setAll('outOfBoundsKill', true);
+  enemies.setAll('checkWorldBounds',true);
+  canSpawn = true;
+
   //Animations here
   player.animations.add('move',[0,1,2,3],12, true);
   player.animations.add('jump',[4,5],12,true);
@@ -126,7 +139,6 @@ function create() {
 }
 
 function update() {
-
 
   //Collide the player with platforms
   game.physics.arcade.collide(player, platform);
@@ -195,8 +207,32 @@ function update() {
   if (game.physics.arcade.overlap(player,obstacles))
   {
     playerHit = true;
+  }
+  else if (game.physics.arcade.overlap(player,enemies))
+  {
+    playerHit = true;
+  }
+
+  if (playerHit == true)
+  {
     restart();
   }
+
+  //Enemy spawn
+  //To avoid too many enemeis
+  if (game.time.now > spawnTime && canSpawn == true)
+  {
+    enemy = enemies.getFirstExists(false);
+    if (enemy)
+      {
+          var spawnRandomizerW = game.rnd.integerInRange(50+gamespeed,300+gamespeed);
+          var spawnRandomizerH = game.rnd.integerInRange(100+gamespeed,400+gamespeed);
+          enemy.reset(game.world.width + spawnRandomizerW, game.world.height - spawnRandomizerH);
+          enemy.body.velocity.x = -500+gamespeed;
+          spawnTime = game.time.now + 500 - gamespeed;
+      }
+  }
+
   // Gamespeed won't go over max speed
   if(gamespeed >= gamespeedMax)
   {
@@ -208,8 +244,11 @@ function update() {
     resetBullet();
   }
 
+  //When bullet hits enemy, do this
+  game.physics.arcade.overlap(bullets, enemies, collisionHandler);
+
   //debugtext
-  text.setText("Gamespeed: " + gamespeed + "   " + playerHit);
+  text.setText("Gamespeed: " + gamespeed + "   " + playerHit + "  " + canFire);
   scoretext.setText("Score: " + score );
   //Debug renderer
   //REMEMBER TO REMOVE (ʘᗩʘ')
@@ -230,7 +269,6 @@ function render()
   game.debug.body(obstacles);
   game.debug.body(bullets);
 }
-
 
 function fireBullet ()
 {
@@ -253,7 +291,6 @@ function resetBullet (bullet)
   bullet.kill();
 }
 
-
 //For now, it stops the movement and pressing any movement keys
 //resets the player location and speed and score
 function restart()
@@ -265,10 +302,15 @@ function restart()
   keyRight.enabled = false;
   //stop player from moving
   player.body.velocity.x = 0;
-  if (keySpace.isDown)
+  canSpawn = false;
+  canFire = false;
+  if (keySpace.isDown && player.body.touching.down)
   {
+    //Reset everything
     player.reset(32, game.world.height - 150);
     obstacles.reset(game.world.width+50,game.world.height - 120);
+    //Kills all remaining enemies from the screen
+    enemies.callAll('kill');
     gamespeed = gamespeedDefault;
     score = 0;
     //enable keys again!
@@ -278,5 +320,14 @@ function restart()
     keyRight.enabled = true;
     playerHit = false;
     canFire = true;
+    canSpawn = true;
   }
+}
+
+//Handler for bullets killing enemies + adding score
+function collisionHandler (bullet, enemy)
+{
+  bullet.kill();
+  enemy.kill();
+  score = score*1 + 50;
 }
