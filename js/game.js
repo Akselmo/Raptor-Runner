@@ -5,7 +5,8 @@
 
 var game = new Phaser.Game(800, 500, Phaser.AUTO, 'gameDiv', { preload: preload, create: create, update: update });
 
-function preload() {
+function preload()
+{
   game.load.spritesheet('raptor', 'sprites/raptorjacketspritesheet.png', 200, 92);
   game.load.image('ground', 'sprites/ground2.png');
   game.load.image('obstacle', 'sprites/obstacle.png');
@@ -13,6 +14,9 @@ function preload() {
   game.load.image('bullet', 'sprites/bullet.png');
   game.load.audio('music', 'sound/tothenextdestination.mp3');
   game.load.image('enemy', 'sprites/enemy.png');
+  game.load.audio('gun', 'sound/guntest.ogg');
+  game.load.audio('explosion', 'sound/explosion.ogg');
+  game.load.audio('crash', 'sound/crash.ogg');
 }
 
 var player;
@@ -36,6 +40,10 @@ var gamespeedDefault = 24;
 var gamespeed;
 var gamespeedMax = 300;
 var music;
+var gunsound;
+var explodesound;
+var repeatsound = false;
+var crashsound;
 var GlobalGame;
 var score = 0;
 var playerHit = 0;
@@ -136,6 +144,21 @@ function create() {
   music.volume = 0.1;
   music.loop = true;
   playerHit = false;
+
+  //Gunsound
+  gunsound = game.add.sound('gun',true);
+  gunsound.volume = 0.3;
+
+  //Explosion sound
+  explodesound = game.add.sound('explosion', true);
+  explodesound.volume = 0.3;
+  explodesound.loop = false;
+
+  //Crash sound
+  crashsound = game.add.sound('crash', false);
+  crashsound.volume = 0.3;
+  crashsound.loop = false;
+  repeatsound = true;
 }
 
 function update() {
@@ -164,6 +187,7 @@ function update() {
   //Bullet firing
   if (keySpace.isDown && canFire == true)
   {
+
     fireBullet();
   }
 
@@ -215,6 +239,12 @@ function update() {
 
   if (playerHit == true)
   {
+    //Stop repeating the sound over and over again!
+    if (!crashsound.isPlaying && repeatsound == true)
+    {
+      crashsound.play();
+      repeatsound = false;
+    }
     restart();
   }
 
@@ -281,6 +311,7 @@ function fireBullet ()
           bullet.reset(player.x + 198, player.y + 50);
           bullet.body.velocity.x = 600+gamespeed;
           bulletTime = game.time.now + 200;
+          gunsound.play();
       }
     }
 }
@@ -321,6 +352,7 @@ function restart()
     playerHit = false;
     canFire = true;
     canSpawn = true;
+    repeatsound = true;
   }
 }
 
@@ -330,4 +362,5 @@ function collisionHandler (bullet, enemy)
   bullet.kill();
   enemy.kill();
   score = score*1 + 50;
+  explodesound.play();
 }
