@@ -1,9 +1,9 @@
-//Things to do: Main menu, shooting, flying enemies, background, ground anim
+//Things to do: Main menu, flying enemies, background, lots of visuals
 //Clean up code when above is done
 //Written by Akseli Lahtinen
 //Hope you enjoy my spaghetti code ᕕ(ᐛ)ᕗ
 
-var game = new Phaser.Game(800, 500, Phaser.AUTO, 'gameDiv', { preload: preload, create: create, update: update });
+var game = new Phaser.Game(800, 500, Phaser.AUTO, 'gameDiv', {preload: preload, create: create, update: update });
 
 function preload()
 {
@@ -17,9 +17,12 @@ function preload()
   game.load.audio('gun', 'sound/guntest.ogg');
   game.load.audio('explosion', 'sound/explosion.ogg');
   game.load.audio('crash', 'sound/crash.ogg');
+  game.load.image('button', 'sprites/playbutton_placeholder.png')
 }
 
+//players and enemies
 var player;
+var playerHit = 0;
 var bullets;
 var bulletTime = 0;
 var canFire = true;
@@ -28,25 +31,30 @@ var obstacles;
 var enemies;
 var canSpawn = true;
 var spawnTime = 0;
+//keys
 var keyUp;
 var keyDown;
 var keyRight;
 var keyLeft;
 var keySpace;
+//text
 var text;
+var pausetext;
 var style;
 //Gamespeed var that gets higher gradually, affects also animation speed
 var gamespeedDefault = 24;
 var gamespeed;
 var gamespeedMax = 300;
+//sounds
 var music;
 var gunsound;
 var explodesound;
 var repeatsound = false;
 var crashsound;
 var GlobalGame;
+//Score
 var score = 0;
-var playerHit = 0;
+
 
 function create() {
 
@@ -127,6 +135,10 @@ function create() {
   text = game.add.text(100, 200, "Gamespeed: " + gamespeed, style);
   text.anchor.set(0.5,7.5);
 
+  //Pause text
+  var style2 = { font: "24px Arial", fill: "#ff0044", align: "left" }
+  pausetext = game.add.text(50,250, "", style2);
+
   //Score
   scoretext = game.add.text(100,200, "Score: " + score, style );
   scoretext.anchor.set(-3,7.5);
@@ -159,6 +171,28 @@ function create() {
   crashsound.volume = 0.3;
   crashsound.loop = false;
   repeatsound = true;
+
+  //Pause function
+  window.onkeydown = function() {
+    //Keycode 27 is ESC
+      if (game.input.keyboard.event.keyCode == 27)
+      {
+        game.paused = !game.paused;
+
+        if(game.paused)
+        {
+          pausetext.setText("Paused!");
+        }
+        else
+        {
+          pausetext.setText("");
+        }
+
+      }
+  }
+  //Open mainmenu when the game is booted the first time
+  mainmenu();
+
 }
 
 function update() {
@@ -278,7 +312,7 @@ function update() {
   game.physics.arcade.overlap(bullets, enemies, collisionHandler);
 
   //debugtext
-  text.setText("Gamespeed: " + gamespeed + "   " + playerHit + "  " + canFire);
+  text.setText("Gamespeed: " + gamespeed + "   " + playerHit + "  " + canFire + "  " + game.paused);
   scoretext.setText("Score: " + score );
   //Debug renderer
   //REMEMBER TO REMOVE (ʘᗩʘ')
@@ -288,7 +322,16 @@ function update() {
 //TO DO: Main menu things
 function mainmenu()
 {
-
+  gamespeed = 0;
+  canSpawn = false;
+  button = game.add.button(game.world.centerX - 95, 400, 'button', startgame, this, 2, 1, 0);
+}
+//Mainmenu button function
+function startgame()
+{
+  canSpawn = true;
+  gamespeed = gamespeedDefault;
+  button.visible = false;
 }
 
 //Debug renderer function that shows hitbox and other info
