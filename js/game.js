@@ -1,4 +1,3 @@
-//Things to do: Main menu, flying enemies, background, lots of visuals
 //Clean up code when above is done
 //Written by Akseli Lahtinen
 //Hope you enjoy my spaghetti code ᕕ(ᐛ)ᕗ
@@ -10,14 +9,16 @@ function preload()
   game.load.spritesheet('raptor', 'sprites/raptorjacketspritesheet.png', 200, 92);
   game.load.image('ground', 'sprites/ground2.png');
   game.load.image('obstacle', 'sprites/obstacle.png');
-  game.load.image('sky', 'sprites/sky_placeholder.png');
+  game.load.image('background', 'sprites/background.png');
   game.load.image('bullet', 'sprites/bullet.png');
-  game.load.audio('music', 'sound/tothenextdestination.mp3');
-  game.load.image('enemy', 'sprites/enemy.png');
+  game.load.audio('music', 'sound/raptorrunner.ogg');
+  game.load.spritesheet('enemy', 'sprites/enemy.png', 128, 64);
   game.load.audio('gun', 'sound/guntest.ogg');
   game.load.audio('explosion', 'sound/explosion.ogg');
+  game.load.audio('jump', 'sound/jump.ogg');
   game.load.audio('crash', 'sound/crash.ogg');
-  game.load.image('button', 'sprites/playbutton_placeholder.png')
+  game.load.image('button', 'sprites/playbutton.png');
+  game.load.image('menuscreen', 'sprites/menuscreen.png');
 }
 
 //players and enemies
@@ -31,6 +32,7 @@ var obstacles;
 var enemies;
 var canSpawn = true;
 var spawnTime = 0;
+var canKillPlayer = true;
 //keys
 var keyUp;
 var keyDown;
@@ -41,6 +43,7 @@ var keySpace;
 var text;
 var pausetext;
 var style;
+var gameovertext;
 //Gamespeed var that gets higher gradually, affects also animation speed
 var gamespeedDefault = 24;
 var gamespeed;
@@ -52,14 +55,17 @@ var explodesound;
 var repeatsound = false;
 var crashsound;
 var GlobalGame;
+var jumpsound;
+var repeatjumpsound = false;
 //Score
 var score = 0;
+
 
 
 function create() {
 
   //Add sky
-  game.add.tileSprite(0,0,game.width,game.height,'sky');
+  background = game.add.tileSprite(0,0,game.width,game.height,'background');
 
   //Physics
   game.physics.startSystem(Phaser.Physics.ARCADE);
@@ -129,19 +135,28 @@ function create() {
   player.animations.add('jump',[4,5],12,true);
   player.animations.add('fall',[6],1,true);
   player.animations.add('dead',[7],1,true);
+  //Enemy animations are assigned elsewhere
 
   //debug text
-  style = { font: "14px Arial", fill: "#ff0044", align: "left" };
-  text = game.add.text(100, 200, "Gamespeed: " + gamespeed, style);
-  text.anchor.set(0.5,7.5);
+  //style = { font: "14px Arial", fill: "#ff0044", align: "left" };
+  //text = game.add.text(100, 200, "Gamespeed: " + gamespeed, style);
+  //text.anchor.set(0.5,7.5);
 
   //Pause text
-  var style2 = { font: "24px Arial", fill: "#ff0044", align: "left" }
-  pausetext = game.add.text(50,250, "", style2);
-
+  var style1 = { font: "48px Silkscreen", fill: "#7d9adb", align: "center" }
+  var style2 = { font: "24px Silkscreen", fill: "#7d9adb", align: "center" }
+  var style3 = { font: "36px Silkscreen", fill: "#7d9adb", align: "center" }
+  pausetext = game.add.text(game.world.centerX-100,game.world.centerY, "", style1);
+  pausetext.stroke = "#000000";
+  pausetext.strokeThickness = 2;
   //Score
-  scoretext = game.add.text(100,200, "Score: " + score, style );
-  scoretext.anchor.set(-3,7.5);
+  scoretext = game.add.text(game.world.centerX+200,game.world.centerY-230, "Score: " + score, style2 );
+  scoretext.stroke = "#000000";
+  scoretext.strokeThickness = 2;
+  //gameover text
+  gameovertext = game.add.text(game.world.centerX-300,game.world.centerY, "", style3)
+  gameovertext.stroke = "#000000";
+  gameovertext.strokeThickness = 2;
 
   //Controls
   keyUp = game.input.keyboard.addKey(Phaser.Keyboard.UP);
@@ -153,13 +168,13 @@ function create() {
   //Music, probably not working correctly yet
   music = game.add.sound('music', true);
   music.play();
-  music.volume = 0.1;
+  music.volume = 0.3;
   music.loop = true;
   playerHit = false;
 
   //Gunsound
   gunsound = game.add.sound('gun',true);
-  gunsound.volume = 0.3;
+  gunsound.volume = 0.4;
 
   //Explosion sound
   explodesound = game.add.sound('explosion', true);
@@ -171,6 +186,13 @@ function create() {
   crashsound.volume = 0.3;
   crashsound.loop = false;
   repeatsound = true;
+
+  //Jump sound
+  jumpsound = game.add.sound('jump', false);
+  jumpsound.volume = 0.3;
+  jumpsound.loop = false;
+  repeatjumpsound = true;
+
 
   //Pause function
   window.onkeydown = function() {
@@ -191,6 +213,8 @@ function create() {
       }
   }
   //Open mainmenu when the game is booted the first time
+  //also load menu screen
+  menuscreen = game.add.image(0,0,'menuscreen');
   mainmenu();
 
 }
@@ -205,9 +229,15 @@ function update() {
   player.body.velocity.x = 0;
 
   //up left right movement keys
-  if (keyUp.isDown  && player.body.touching.down)
+  if (keyUp.isDown && player.body.touching.down)
   {
+    repeatjumpsound = true;
     player.body.velocity.y = -550;
+    if (!jumpsound.isPlaying && repeatjumpsound == true)
+    {
+      jumpsound.play();
+      repeatjumpsound = false;
+    }
   }
   else if (keyRight.isDown)
   {
@@ -229,6 +259,7 @@ function update() {
   if (playerHit == false && !player.body.touching.down)
   {
     player.animations.play('jump');
+
   }
   //check if player is hit & in air, play falling animation if hit
   else if (playerHit == true && !player.body.touching.down)
@@ -266,7 +297,7 @@ function update() {
   {
     playerHit = true;
   }
-  else if (game.physics.arcade.overlap(player,enemies))
+  else if (game.physics.arcade.overlap(player,enemies) && canKillPlayer == true)
   {
     playerHit = true;
   }
@@ -287,8 +318,12 @@ function update() {
   if (game.time.now > spawnTime && canSpawn == true)
   {
     enemy = enemies.getFirstExists(false);
+    //Assign enemy players here
+    enemy.animations.add('enemyFly',[0,1,2],12,true);
+    enemy.animations.play('enemyFly');
     if (enemy)
       {
+          canKillPlayer = true;
           var spawnRandomizerW = game.rnd.integerInRange(50+gamespeed,300+gamespeed);
           var spawnRandomizerH = game.rnd.integerInRange(100+gamespeed,400+gamespeed);
           enemy.reset(game.world.width + spawnRandomizerW, game.world.height - spawnRandomizerH);
@@ -312,11 +347,14 @@ function update() {
   game.physics.arcade.overlap(bullets, enemies, collisionHandler);
 
   //debugtext
-  text.setText("Gamespeed: " + gamespeed + "   " + playerHit + "  " + canFire + "  " + game.paused);
+  //text.setText("Gamespeed: " + gamespeed + "   " + playerHit + "  " + canKillPlayer + "  " + game.paused);
   scoretext.setText("Score: " + score );
+
   //Debug renderer
   //REMEMBER TO REMOVE (ʘᗩʘ')
   //render();
+
+  background.tilePosition.x -= 0.01 * gamespeed;
 }
 
 //TO DO: Main menu things
@@ -324,7 +362,14 @@ function mainmenu()
 {
   gamespeed = 0;
   canSpawn = false;
-  button = game.add.button(game.world.centerX - 95, 400, 'button', startgame, this, 2, 1, 0);
+  button = game.add.button(game.world.centerX - 350, 400, 'button', startgame, this, 2, 1, 0);
+  keyUp.enabled = false;
+  keyDown.enabled = false;
+  keyLeft.enabled = false;
+  keyRight.enabled = false;
+  keySpace.enabled = false;
+
+
 }
 //Mainmenu button function
 function startgame()
@@ -332,6 +377,12 @@ function startgame()
   canSpawn = true;
   gamespeed = gamespeedDefault;
   button.visible = false;
+  keyUp.enabled = true;
+  keyDown.enabled = true;
+  keyLeft.enabled = true;
+  keyRight.enabled = true;
+  keySpace.enabled = true;
+  menuscreen.visible = false;
 }
 
 //Debug renderer function that shows hitbox and other info
@@ -378,6 +429,7 @@ function restart()
   player.body.velocity.x = 0;
   canSpawn = false;
   canFire = false;
+  gameovertext.setText("GAME OVER! \n Press Space to try again!");
   if (keySpace.isDown && player.body.touching.down)
   {
     //Reset everything
@@ -396,14 +448,18 @@ function restart()
     canFire = true;
     canSpawn = true;
     repeatsound = true;
+    gameovertext.setText("");
   }
 }
 
 //Handler for bullets killing enemies + adding score
 function collisionHandler (bullet, enemy)
 {
+  canKillPlayer = false;
+  var explode = enemy.animations.add('enemyExplode',[3],12,false);
+  enemy.animations.play("enemyExplode");
+  explode.killOnComplete = true;
   bullet.kill();
-  enemy.kill();
   score = score*1 + 50;
   explodesound.play();
 }

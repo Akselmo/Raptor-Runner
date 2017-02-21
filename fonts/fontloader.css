@@ -1,0 +1,9 @@
+body {
+  margin: 0;
+}
+
+@font-face {
+  font-family: 'Silkscreen';
+  src: url('../fonts/slkscr.ttf')
+  format('truetype');
+}
