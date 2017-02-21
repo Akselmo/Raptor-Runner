@@ -19,3 +19,5 @@ Some helpful tools I used while making this game.
 [Pyxel Edit](http://pyxeledit.com/)
 
 [Atom.io texteditor](https://atom.io/)
+
+[Sonic Pi](http://sonic-pi.net/)
