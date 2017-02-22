@@ -21,3 +21,8 @@ Some helpful tools I used while making this game.
 [Atom.io texteditor](https://atom.io/)
 
 [Sonic Pi](http://sonic-pi.net/)
+
+##Download
+
+You can download the game from my itch.io.
+[https://akselmo.itch.io/raptor-runner](https://akselmo.itch.io/raptor-runner)
