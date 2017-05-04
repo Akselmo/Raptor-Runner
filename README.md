@@ -8,7 +8,8 @@ The game is made in Javascript and it uses the Phaser engine.
 Simple background music loop is made by me aswell.
 
 
-##Tools
+Tools
+-----
 
 Some helpful tools I used while making this game.
 
@@ -22,7 +23,8 @@ Some helpful tools I used while making this game.
 
 [Sonic Pi](http://sonic-pi.net/)
 
-##Download
+Download
+--------
 
 You can download the game from my itch.io.
 [https://akselmo.itch.io/raptor-runner](https://akselmo.itch.io/raptor-runner)
