@@ -1,6 +1,6 @@
 {
     "webexe_settings": {
-        "blacklist": "hellophaser",
+        "blacklist": ".git\n.gitattributes\n.gitignore",
         "custom_script": "",
         "download_dir": "",
         "export_dir": "output",
@@ -9,7 +9,7 @@
         "nw_version": "0.20.0-beta2",
         "output_pattern": "",
         "sdk_build": false,
-        "uncompressed_folder": false,
+        "uncompressed_folder": true,
         "whitelist": "",
         "windows-x32": true
     }

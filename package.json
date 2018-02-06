@@ -1,20 +1,37 @@
 {
-    "app_name": "Raptor-Runner",
+    "app_name": "Raptor Runner",
+    "description": "An endless runner game featuring a raptor with hoverboots",
     "main": "game.html",
-    "name": "Raptor-Runner",
+    "name": "Raptor Runner",
+    "webexe_settings": {
+        "blacklist": "hellophaser",
+        "custom_script": "",
+        "download_dir": "",
+        "export_dir": "output",
+        "force_download": false,
+        "nw_compression_level": 4,
+        "nw_version": "0.20.0-beta2",
+        "output_pattern": "",
+        "sdk_build": false,
+        "uncompressed_folder": false,
+        "whitelist": "",
+        "windows-x32": true
+    },
     "webkit": {},
     "window": {
+        "exe_icon": "sprites\\icon256.png",
         "frame": true,
-        "height": 400,
+        "height": 450,
         "id": "Raptor-Runner",
-        "max_height": 400,
-        "max_width": 600,
+        "mac_icon": "sprites\\icon256.png",
+        "max_height": 500,
+        "max_width": 800,
         "min_height": 400,
-        "min_width": 600,
+        "min_width": 700,
         "show": true,
         "show_in_taskbar": true,
         "title": "Raptor-Runner",
         "visible": true,
-        "width": 600
+        "width": 750
     }
 }
