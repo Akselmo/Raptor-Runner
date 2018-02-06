@@ -252,31 +252,30 @@ function create() {
     btnToggleBtnOff.events.onInputDown.add(function() { btnToggleBtnPressOff = true; });
     btnToggleBtnOff.events.onInputUp.add(function() { btnToggleBtnPressOff = false; });
 
-    btnLeft = game.add.button(game.world.centerX - 310, 400, 'btnLeft', btnLeft, this, 2, 1, 0);
+    btnLeft = game.add.button(game.world.centerX - 320, 380, 'btnLeft', btnLeft, this, 2, 1, 0);
     btnLeft.fixedToCamera = true;
     btnLeft.events.onInputDown.add(function() { btnLeftPress = true; });
     btnLeft.events.onInputUp.add(function() { btnLeftPress = false; });
 
-
-    btnRight = game.add.button(game.world.centerX - 190, 400, 'btnRight', btnRight, this, 2, 1, 0);
+    btnRight = game.add.button(game.world.centerX - 180, 380, 'btnRight', btnRight, this, 2, 1, 0);
     btnRight.fixedToCamera = true;
     btnRight.events.onInputDown.add(function() { btnRightPress = true; });
     btnRight.events.onInputUp.add(function() { btnRightPress = false; });
 
-    btnUp = game.add.button(game.world.centerX - 250, 400, 'btnUp', btnUp, this, 2, 1, 0);
+    btnUp = game.add.button(game.world.centerX - 250, 310, 'btnUp', btnUp, this, 2, 1, 0);
     btnUp.fixedToCamera = true;
     btnUp.events.onInputDown.add(function() { btnUpPress = true; });
     btnUp.events.onInputUp.add(function() { btnUpPress = false; });
 
-    btnFire = game.add.button(game.world.centerX + 250, 400, 'btnFire', btnFire, this, 2, 1, 0);
+    btnFire = game.add.button(game.world.centerX + 250, 380, 'btnFire', btnFire, this, 2, 1, 0);
     btnFire.fixedToCamera = true;
     btnFire.events.onInputDown.add(function() { btnFirePress = true; });
     btnFire.events.onInputUp.add(function() { btnFirePress = false; });
 
-    btnLeft.scale.setTo(0.5, 0.5);
-    btnUp.scale.setTo(0.5, 0.5);
-    btnRight.scale.setTo(0.5, 0.5);
-    btnFire.scale.setTo(0.5, 0.5);
+    btnLeft.scale.setTo(0.7, 0.7);
+    btnUp.scale.setTo(0.7, 0.7);
+    btnRight.scale.setTo(0.7, 0.7);
+    btnFire.scale.setTo(0.7, 0.7);
     btnToggleBtnOff.scale.setTo(0.7, 0.7);
     btnToggleBtnOn.scale.setTo(0.7, 0.7);
 
